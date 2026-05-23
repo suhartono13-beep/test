@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>访客操作记录面板</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <h1>欢迎来到访客记录站</h1>
+    
+    <input type="text" id="visitorName" placeholder="输入你的名字">
+    <button onclick="recordAction('点击了测试按钮')">记录测试操作</button>
+
+    <h2>最近的操作记录：</h2>
+    <ul id="logList"></ul>
+
+    <script>
+        // 替换为你自己的 Supabase URL 和 Anon Key
+        const SUPABASE_URL = 'https://cabqmwtayaojrvdehqrt.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_AlLGYT7ONGa0q_eIqHpXlg_H7giwU9N';
+        
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // 记录操作到数据库
+        async function recordAction(actionType) {
+            const name = document.getElementById('visitorName').value || '匿名访客';
+            
+            const { data, error } = await supabase
+                .from('visitor_logs')
+                .insert([{ visitor_name: name, action: actionType }]);
+
+            if (error) {
+                console.error('记录失败:', error);
+                alert('记录失败');
+            } else {
+                alert('操作已记录！');
+                fetchLogs(); // 刷新列表
+            }
+        }
+
+        // 从数据库读取最新记录
+        async function fetchLogs() {
+            const { data, error } = await supabase
+                .from('visitor_logs')
+                .select('*')
+                .order('created_at', { ascending: false })
+                .limit(10);
+
+            if (error) {
+                console.error('获取数据失败:', error);
+                return;
+            }
+
+            const list = document.getElementById('logList');
+            list.innerHTML = '';
+            data.forEach(log => {
+                const li = document.createElement('li');
+                li.textContent = `${log.created_at} - ${log.visitor_name}: ${log.action}`;
+                list.appendChild(li);
+            });
+        }
+
+        // 页面加载时获取一次记录
+        window.onload = fetchLogs;
+    </script>
+</body>
+</html>
