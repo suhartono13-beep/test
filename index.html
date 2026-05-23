@@ -12,6 +12,10 @@
         button.logout { background: #9e9e9e; margin-top: 10px; }
         .log-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
         .del-btn { background: #ff4d4d; color: white; border: none; padding: 2px 8px; border-radius: 4px; cursor: pointer; width: auto; font-size: 12px; }
+        /* 专属功能块样式 */
+        .exclusive-panel { display: none; padding: 10px; border-radius: 6px; margin-top: 10px; font-size: 14px; }
+        #momPanel { background: #fff0f6; border: 1px solid #ffadd2; color: #c41d7f; }
+        #dadPanel { background: #e6f7ff; border: 1px solid #91d5ff; color: #096dd9; }
     </style>
 </head>
 <body>
@@ -30,13 +34,15 @@
         
         <hr>
         <h4>新增一条记录</h4>
-        <select id="category">
-            <option value="生活记录">📝 生活记录</option>
-            <option value="家庭记账">💰 家庭记账</option>
-            <option value="家务打卡">🧹 家务打卡</option>
-        </select>
+        
+        <label for="category">操作类型：</label>
+        <select id="category"></select>
+        
         <input type="text" id="content" placeholder="今天写点什么？">
         <button onclick="addRecord()">提交记录</button>
+
+        <div id="momPanel" class="exclusive-panel">💡 提示：今日触发了财务同步，记得核对账单哦。</div>
+        <div id="dadPanel" class="exclusive-panel">🛠️ 提示：本周轮到你清理抽油烟机啦！</div>
 
         <hr>
         <h4>我的历史记录</h4>
@@ -48,19 +54,16 @@
     <script>
         const SUPABASE_URL = 'https://cabqmwtayaojrvdehqrt.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_AlLGYT7ONGa0q_eIqHpXlg_H7giwU9N';
-        
-        // 修复点：将创建的实例命名为 client，避免与全局的 supabase 对象冲突
         const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        const SUFFIX = '@family.local'; // 家庭专属虚拟邮箱后缀
+        const SUFFIX = '@family.local'; 
 
         // 登录
         async function login() {
-            const user = document.getElementById('username').value.trim();
+            const user = document.getElementById('username').value.trim().toLowerCase(); // 转小写防错
             const pass = document.getElementById('password').value;
             if(!user || !pass) return alert('请输入代号和密码');
 
-            // 修复点：替换为 client.auth
             const { data, error } = await client.auth.signInWithPassword({
                 email: user + SUFFIX,
                 password: pass
@@ -72,19 +75,24 @@
 
         // 登出
         async function logout() {
-            // 修复点：替换为 client.auth
             await client.auth.signOut();
             checkUser();
         }
 
         // 检查状态
         async function checkUser() {
-            // 修复点：替换为 client.auth
             const { data: { session } } = await client.auth.getSession();
             if (session) {
                 document.getElementById('loginBox').style.display = 'none';
                 document.getElementById('mainBox').style.display = 'block';
-                document.getElementById('welcomeMsg').innerText = `你好，${session.user.email.split('@')[0]} 欢迎回家！`;
+                
+                // 提取出用户名 (如 mother, father)
+                const username = session.user.email.split('@')[0];
+                document.getElementById('welcomeMsg').innerText = `你好，${username} 欢迎回家！`;
+                
+                // 核心：根据不同的人定制不同的功能和界面
+                setupFamilyRole(username);
+                
                 fetchMyRecords();
             } else {
                 document.getElementById('loginBox').style.display = 'block';
@@ -92,9 +100,53 @@
             }
         }
 
-        // 核心：拉取数据
+        // 【核心函数】根据成员身份，分发不同的具体功能
+        function setupFamilyRole(username) {
+            const categorySelect = document.getElementById('category');
+            
+            // 先清空原有的选项
+            categorySelect.innerHTML = '';
+            
+            // 隐藏所有的专属面板
+            document.getElementById('momPanel').style.display = 'none';
+            document.getElementById('dadPanel').style.display = 'none';
+
+            // 根据名字，塞入不同的专属功能选项
+            if (username === 'mother') {
+                // 妈妈专属功能
+                addOption(categorySelect, '💰 家庭记账', '家庭记账');
+                addOption(categorySelect, '📝 生活记录', '生活记录');
+                // 显示妈妈专属提示
+                document.getElementById('momPanel').style.display = 'block';
+                
+            } else if (username === 'father') {
+                // 爸爸专属功能
+                addOption(categorySelect, '🧹 家务打卡', '家务打卡');
+                addOption(categorySelect, '🛠️ 房屋修缮', '房屋修缮');
+                addOption(categorySelect, '📝 生活记录', '生活记录');
+                // 显示爸爸专属提示
+                document.getElementById('dadPanel').style.display = 'block';
+                
+            } else if (username === 'child') {
+                // 孩子专属功能
+                addOption(categorySelect, '📚 学习打卡', '学习打卡');
+                addOption(categorySelect, '🍬 零花钱记账', '零花钱记账');
+            } else {
+                // 备用：其他可能添加的普通成员
+                addOption(categorySelect, '📝 普通记录', '普通记录');
+            }
+        }
+
+        // 辅助工具：往下拉菜单加选项
+        function addOption(selectElement, text, value) {
+            const opt = document.createElement('option');
+            opt.text = text;
+            opt.value = value;
+            selectElement.add(opt);
+        }
+
+        // 拉取数据
         async function fetchMyRecords() {
-            // 修复点：替换为 client.from
             const { data, error } = await client
                 .from('family_records')
                 .select('*')
@@ -119,13 +171,12 @@
             });
         }
 
-        // 核心：添加数据
+        // 添加数据
         async function addRecord() {
             const content = document.getElementById('content').value.trim();
             const category = document.getElementById('category').value;
             if(!content) return alert('内容不能为空');
 
-            // 修复点：替换为 client.from
             const { error } = await client
                 .from('family_records')
                 .insert([{ content, category }]);
@@ -137,11 +188,10 @@
             }
         }
 
-        // 核心：删除数据
+        // 删除数据
         async function deleteRecord(id) {
             if(!confirm('确定要删除这条记录吗？')) return;
             
-            // 修复点：替换为 client.from
             const { error } = await client
                 .from('family_records')
                 .delete()
