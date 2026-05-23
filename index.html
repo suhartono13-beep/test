@@ -2,19 +2,119 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>🏡 职业版家庭日常空间 (安全密码版)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🏡 家庭日常空间</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { font-family: system-ui, sans-serif; padding: 20px; max-width: 500px; margin: 0 auto; background: #f4f6f9; }
-        .box { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        input, select { display: block; width: 100%; padding: 12px; margin-bottom: 10px; box-sizing: border-box; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
-        button { width: 100%; padding: 12px; background: #4CAF50; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; }
-        button.logout { background: #9e9e9e; margin-top: 10px; }
-        .log-item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #eee; align-items: center; }
-        .del-btn { background: #ff4d4d; color: white; border: none; padding: 4px 10px; border-radius: 6px; cursor: pointer; width: auto; font-size: 12px; }
+        /* 💡 核心改变 2：优化移动端全局样式，去掉死板的固定宽度 */
+        body { 
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            padding: 16px; 
+            max-width: 600px; 
+            margin: 0 auto; 
+            background: #f4f6f9; 
+            color: #333;
+            -webkit-tap-highlight-color: transparent; /* 移除手机点击时的自带高亮阴影 */
+        }
         
-        /* 四人职业专属看板颜色样式 */
-        .exclusive-panel { display: none; padding: 12px; border-radius: 8px; margin-top: 10px; font-size: 14px; font-weight: 500; }
+        .box { 
+            background: white; 
+            padding: 20px; 
+            border-radius: 16px; /* 移动端更圆润的卡片设计 */
+            box-shadow: 0 4px 16px rgba(0,0,0,0.04); 
+            margin-bottom: 16px; 
+        }
+        
+        h1 { font-size: 24px; text-align: center; color: #2c3e50; margin: 20px 0; }
+        h3 { font-size: 18px; margin-top: 0; }
+        h4 { font-size: 16px; margin: 15px 0 10px 0; color: #2c3e50; }
+        
+        /* 💡 核心改变 3：增大输入框和选择框的高度，更方便手机手指点选 */
+        input, select { 
+            display: block; 
+            width: 100%; 
+            padding: 14px; 
+            margin-bottom: 12px; 
+            box-sizing: border-box; 
+            border: 1px solid #dcdfe6; 
+            border-radius: 10px; 
+            font-size: 15px; /* 防止 iOS 浏览器自动放大输入框 */
+            background-color: #fff;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        input:focus, select:focus {
+            border-color: #4CAF50;
+        }
+        
+        /* 💡 核心改变 4：加大按钮点击区域（符合大拇指触控热区） */
+        button { 
+            width: 100%; 
+            padding: 14px; 
+            background: #4CAF50; 
+            color: white; 
+            border: none; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            font-size: 16px; 
+            font-weight: bold; 
+            box-shadow: 0 2px 6px rgba(76, 175, 80, 0.2);
+            active-transform: scale(0.98); /* 点击时微弱的按压反馈 */
+        }
+        button:active {
+            background: #43a047;
+        }
+        button.logout { 
+            background: #f4f5f7; 
+            color: #606266;
+            box-shadow: none;
+            margin-top: 15px; 
+        }
+        button.logout:active {
+            background: #e4e7ed;
+        }
+        
+        /* 历史记录列表移动端优化：左右分布，内容过长自动换行 */
+        .log-item { 
+            display: flex; 
+            justify-content: space-between; 
+            padding: 14px 0; 
+            border-bottom: 1px solid #f0f2f5; 
+            align-items: center; 
+        }
+        .log-item span {
+            font-size: 14px; 
+            color: #303133; 
+            line-height: 1.5;
+            padding-right: 10px;
+            word-break: break-all; /* 防止英文长字符串撑破布局 */
+        }
+        .del-btn { 
+            background: #ff4d4d; 
+            color: white; 
+            border: none; 
+            padding: 6px 12px; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            width: auto; 
+            font-size: 13px; 
+            flex-shrink: 0; /* 防止删除按钮被长文本挤压变形 */
+            box-shadow: 0 2px 4px rgba(255, 77, 77, 0.1);
+        }
+        .del-btn:active {
+            background: #dd3333;
+        }
+        
+        /* 四人职业专属看板移动端优化 */
+        .exclusive-panel { 
+            display: none; 
+            padding: 14px; 
+            border-radius: 10px; 
+            margin-top: 12px; 
+            font-size: 14px; 
+            font-weight: 500; 
+            line-height: 1.5;
+        }
         #momPanel { background: #fff0f6; border: 1px solid #ffadd2; color: #c41d7f; }
         #dadPanel { background: #e6f7ff; border: 1px solid #91d5ff; color: #096dd9; }
         #sisterPanel { background: #f9f0ff; border: 1px solid #d3adf7; color: #722ed1; }
@@ -23,21 +123,21 @@
 </head>
 <body>
 
-    <h1 style="text-align: center; color: #2c3e50; margin-bottom: 30px;">🏡 我们的家庭日常空间</h1>
+    <h1>🏡 我们的家庭空间</h1>
 
     <div id="loginBox" class="box">
-        <h3 style="margin-top:0;">家人密码登录</h3>
-        <input type="text" id="username" placeholder="请输入代号 (mother, father, sister, brother)">
+        <h3 style="margin-bottom: 15px;">家人密码登录</h3>
+        <input type="text" id="username" placeholder="请输入代号 (mother, father, ...)模">
         <input type="password" id="password" placeholder="请输入你的专属密码">
         <button onclick="login()">进入空间</button>
     </div>
 
     <div id="mainBox" class="box" style="display: none;">
-        <h3 id="welcomeMsg" style="margin-top:0; color: #34495e;">欢迎回家</h3>
+        <h3 id="welcomeMsg" style="color: #2c3e50;">欢迎回家</h3>
         <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
         
         <h4>➕ 新增一条记录</h4>
-        <label for="category" style="font-size:12px; color:#7f8c8d;">当前可用功能：</label>
+        <label for="category" style="font-size:12px; color:#909399; display:block; margin-bottom:5px;">当前可用功能：</label>
         <select id="category"></select>
         
         <input type="text" id="content" placeholder="记录点什么...">
@@ -62,33 +162,24 @@
         
         const SUFFIX = '@family.local'; 
 
-        // 登录（加装极其强悍的防空检查，绝不报错）
         async function login() {
             const userEl = document.getElementById('username');
             const passEl = document.getElementById('password');
             
-            // 阻断性校验：如果页面上缺少输入框，立刻拦截并提示，不往下执行引发 null 报错
-            if (!userEl || !passEl) {
-                return alert('前端代码获取输入框失败，请尝试刷新页面！');
-            }
+            if (!userEl || !passEl) return alert('页面元素损坏，请刷新！');
 
             const user = userEl.value.trim().toLowerCase();
             const pass = passEl.value;
             
-            if (!user || !pass) {
-                return alert('请输入代号和密码！');
-            }
+            if (!user || !pass) return alert('请输入代号和密码！');
 
             const { data, error } = await client.auth.signInWithPassword({
                 email: user + SUFFIX,
                 password: pass
             });
 
-            if (error) {
-                alert('登录失败，密码或代号不对哦');
-            } else {
-                checkUser();
-            }
+            if (error) alert('登录失败，密码或代号不对哦');
+            else checkUser();
         }
 
         async function logout() {
@@ -109,17 +200,11 @@
                 const welcomeMsg = document.getElementById('welcomeMsg');
                 
                 if (welcomeMsg) {
-                    if (username === 'brother') {
-                        welcomeMsg.innerText = `✨ 你好，姐夫！欢迎回来`;
-                    } else if (username === 'sister') {
-                        welcomeMsg.innerText = `✨ 你好，姐姐！欢迎回来`;
-                    } else if (username === 'mother') {
-                        welcomeMsg.innerText = `✨ 你好，妈妈！欢迎回来`;
-                    } else if (username === 'father') {
-                        welcomeMsg.innerText = `✨ 你好，爸爸！欢迎回来`;
-                    } else {
-                        welcomeMsg.innerText = `✨ 你好，${username}！欢迎回来`;
-                    }
+                    if (username === 'brother') welcomeMsg.innerText = `✨ 你好，工程师姐夫！`;
+                    else if (username === 'sister') welcomeMsg.innerText = `✨ 你好，周老师（姐姐）！`;
+                    else if (username === 'mother') welcomeMsg.innerText = `✨ 你好，妈妈（老板）！`;
+                    else if (username === 'father') welcomeMsg.innerText = `✨ 你好，爸爸（老板）！`;
+                    else welcomeMsg.innerText = `✨ 你好，${username}！`;
                 }
                 
                 setupFamilyRole(username);
@@ -130,14 +215,11 @@
             }
         }
 
-        // 核心：分发四人职业特制功能（加装异常防护罩，杜绝 style of null）
         function setupFamilyRole(username) {
             const categorySelect = document.getElementById('category');
             if (!categorySelect) return;
+            categorySelect.innerHTML = ''; 
             
-            categorySelect.innerHTML = ''; // 清空选项
-            
-            // 安全隐蔽所有看板
             const panels = ['momPanel', 'dadPanel', 'sisterPanel', 'brotherPanel'];
             panels.forEach(id => {
                 const el = document.getElementById(id);
@@ -145,37 +227,29 @@
             });
 
             if (username === 'mother') {
-                // 妈妈（商人）
                 addOption(categorySelect, '📈 商业灵感记事', '商业灵感记事');
                 addOption(categorySelect, '💰 商务/家庭记账', '商务家庭记账');
                 addOption(categorySelect, '📅 核心日程备忘', '核心日程备忘');
                 const p = document.getElementById('momPanel');
                 if (p) p.style.display = 'block';
-                
             } else if (username === 'father') {
-                // 爸爸（商人）
                 addOption(categorySelect, '🤝 重要客户备忘', '重要客户备忘');
                 addOption(categorySelect, '🚘 商务出差打卡', '商务出差打卡');
                 addOption(categorySelect, '📝 经营心得随笔', '经营心得随笔');
                 const p = document.getElementById('dadPanel');
                 if (p) p.style.display = 'block';
-                
             } else if (username === 'sister') {
-                // 姐姐（大学老师）
                 addOption(categorySelect, '📚 教学备课灵感', '教学备课灵感');
                 addOption(categorySelect, '🧪 科研进度打卡', '科研进度打卡');
                 addOption(categorySelect, '🎓 学生事务备注', '学生事务备注');
                 const p = document.getElementById('sisterPanel');
                 if (p) p.style.display = 'block';
-                
             } else if (username === 'brother') {
-                // 姐夫（工程师），使用原 brother 账号登录
                 addOption(categorySelect, '🛠️ 家庭设备维护', '家庭设备维护');
                 addOption(categorySelect, '💻 技术学习/Bug日志', '技术学习Bug日志');
                 addOption(categorySelect, '✅ 高效待办清单', '高效待办清单');
                 const p = document.getElementById('brotherPanel');
                 if (p) p.style.display = 'block';
-                
             } else {
                 addOption(categorySelect, '📝 游客日常记录', '游客日常记录');
             }
@@ -207,7 +281,7 @@
                 const div = document.createElement('div');
                 div.className = 'log-item';
                 div.innerHTML = `
-                    <span style="font-size:14px; color:#2c3e50;"><b>[${item.category}]</b> ${item.content}</span>
+                    <span><b>[${item.category}]</b> ${item.content}</span>
                     <button class="del-btn" onclick="deleteRecord(${item.id})">删除</button>
                 `;
                 listDiv.appendChild(div);
@@ -227,9 +301,8 @@
                 .from('family_records')
                 .insert([{ content, category }]);
 
-            if (error) {
-                alert('保存失败了！原因：' + error.message);
-            } else {
+            if (error) alert('保存失败了！原因：' + error.message);
+            else {
                 contentEl.value = '';
                 fetchMyRecords();
             }
