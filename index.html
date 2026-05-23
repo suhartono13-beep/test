@@ -2,66 +2,77 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>我们的家庭日常站</title>
+    <title>全新升级 🏡 职业版家庭日常空间</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { font-family: system-ui, sans-serif; padding: 20px; max-width: 500px; margin: 0 auto; background: #f9f9f9; }
-        .box { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        input, select { display: block; width: 100%; padding: 10px; margin-bottom: 10px; box-sizing: border-box; border: 1px solid #ddd; border-radius: 6px; }
-        button { width: 100%; padding: 10px; background: #4CAF50; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; }
+        body { font-family: system-ui, sans-serif; padding: 20px; max-width: 500px; margin: 0 auto; background: #f4f6f9; }
+        .box { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        input, select { display: block; width: 100%; padding: 12px; margin-bottom: 10px; box-sizing: border-box; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
+        button { width: 100%; padding: 12px; background: #4CAF50; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; }
         button.logout { background: #9e9e9e; margin-top: 10px; }
-        .log-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
-        .del-btn { background: #ff4d4d; color: white; border: none; padding: 2px 8px; border-radius: 4px; cursor: pointer; width: auto; font-size: 12px; }
-        /* 专属功能块样式 */
-        .exclusive-panel { display: none; padding: 10px; border-radius: 6px; margin-top: 10px; font-size: 14px; }
+        .log-item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #eee; align-items: center; }
+        .del-btn { background: #ff4d4d; color: white; border: none; padding: 4px 10px; border-radius: 6px; cursor: pointer; width: auto; font-size: 12px; }
+        
+        /* 四人职业专属看板颜色样式 */
+        .exclusive-panel { display: none; padding: 12px; border-radius: 8px; margin-top: 10px; font-size: 14px; font-weight: 500; }
         #momPanel { background: #fff0f6; border: 1px solid #ffadd2; color: #c41d7f; }
         #dadPanel { background: #e6f7ff; border: 1px solid #91d5ff; color: #096dd9; }
+        #sisterPanel { background: #f9f0ff; border: 1px solid #d3adf7; color: #722ed1; }
+        #brotherPanel { background: #f6ffed; border: 1px solid #b7eb8f; color: #389e0d; }
     </style>
 </head>
 <body>
 
-    <h1 style="text-align: center; color: #333;">🏡 家庭日常空间</h1>
+    <h1 style="text-align: center; color: #2c3e50; margin-bottom: 30px;">🏡 我们的家庭日常空间</h1>
 
     <div id="loginBox" class="box">
-        <h3>家人登录</h3>
-        <input type="text" id="username" placeholder="输入你的名字代号 (如: father, mother)">
-        <input type="text" id="username" placeholder="名字代号 (mother, father, sister, brother)">
+        <h3 style="margin-top:0;">家人登录</h3>
+        <input type="text" id="username" placeholder="代号 (mother, father, sister, brother)">
+        <input type="password" id="password" placeholder="输入密码">
         <button onclick="login()">进入空间</button>
     </div>
 
     <div id="mainBox" class="box" style="display: none;">
-        <h3 id="welcomeMsg">欢迎</h3>
+        <h3 id="welcomeMsg" style="margin-top:0; color: #34495e;">欢迎回家</h3>
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
         
-        <hr>
-        <h4>新增一条记录</h4>
-        
-        <label for="category">操作类型：</label>
+        <h4>➕ 新增一条记录</h4>
+        <label for="category" style="font-size:12px; color:#7f8c8d;">当前可用功能：</label>
         <select id="category"></select>
         
-        <input type="text" id="content" placeholder="今天写点什么？">
-        <button onclick="addRecord()">提交记录</button>
+        <input type="text" id="content" placeholder="记录点什么...">
+        <button onclick="addRecord()">提交保存</button>
 
-        <div id="momPanel" class="exclusive-panel">💡 提示：今日触发了财务同步，记得核对账单哦。</div>
-        <div id="dadPanel" class="exclusive-panel">🛠️ 提示：本周轮到你清理抽油烟机啦！</div>
+        <div id="momPanel" class="exclusive-panel">👩‍💼 妈妈（商人）看板：今日有新的市场灵感吗？记得核对本周资金流水。</div>
+        <div id="dadPanel" class="exclusive-panel">👨‍💼 爸爸（商人）看板：和重要客户的约谈资料记得做好备份，出差注意安全。</div>
+        <div id="sisterPanel" class="exclusive-panel">👩‍🏫 姐姐（大学老师）看板：下周的教案准备好了吗？记得关注学生的论文初稿进度。</div>
+        <div id="brotherPanel" class="exclusive-panel">👨‍💻 姐夫（工程师）看板：家里的路由器、智能家居固件该检查更新了，今天写代码也要多喝水！</div>
 
-        <hr>
-        <h4>我的历史记录</h4>
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+        <h4>📋 我的历史足迹</h4>
         <div id="myRecordsList">加载中...</div>
 
-        <button onclick="logout()" class="logout">退出登录</button>
+        <button onclick="logout()" class="logout">退出空间</button>
     </div>
 
     <script>
         const SUPABASE_URL = 'https://cabqmwtayaojrvdehqrt.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNhYnFtd3RheWFvanJ2ZGVocXJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1MjkzOTMsImV4cCI6MjA5NTEwNTM5M30.t7AXfodxLT84j1UV1ghcQeSKTbi7pt24Ha1iTLTmaog';
         const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
+        
         const SUFFIX = '@family.local'; 
 
-        // 登录
+        // 登录（带安全防空保护）
         async function login() {
-            const user = document.getElementById('username').value.trim().toLowerCase(); // 转小写防错
-            const pass = document.getElementById('password').value;
+            const userEl = document.getElementById('username');
+            const passEl = document.getElementById('password');
+            
+            if(!userEl || !passEl) {
+                return alert('前端网页元素损坏，请重新刷新页面或重新复制代码！');
+            }
+
+            const user = userEl.value.trim().toLowerCase();
+            const pass = passEl.value;
             if(!user || !pass) return alert('请输入代号和密码');
 
             const { data, error } = await client.auth.signInWithPassword({
@@ -69,92 +80,92 @@
                 password: pass
             });
 
-            if (error) alert('登录失败，密码错啦');
+            if (error) alert('登录失败，密码或代号不对哦');
             else checkUser();
         }
 
-        // 登出
         async function logout() {
             await client.auth.signOut();
             checkUser();
         }
 
-        // 检查状态
         async function checkUser() {
             const { data: { session } } = await client.auth.getSession();
+            const loginBox = document.getElementById('loginBox');
+            const mainBox = document.getElementById('mainBox');
+
             if (session) {
-                document.getElementById('loginBox').style.display = 'none';
-                document.getElementById('mainBox').style.display = 'block';
+                if(loginBox) loginBox.style.display = 'none';
+                if(mainBox) mainBox.style.display = 'block';
                 
-                // 提取出用户名 (如 mother, father)
                 const username = session.user.email.split('@')[0];
-                document.getElementById('welcomeMsg').innerText = `你好，${username} 欢迎回家！`;
+                const welcomeMsg = document.getElementById('welcomeMsg');
                 
-                // 核心：根据不同的人定制不同的功能和界面
+                if(welcomeMsg) {
+                    if(username === 'brother') {
+                        welcomeMsg.innerText = `✨ 你好，工程师姐夫！欢迎回来`;
+                    } else if(username === 'sister') {
+                        welcomeMsg.innerText = `✨ 你好，周老师（姐姐）！欢迎回来`;
+                    } else {
+                        welcomeMsg.innerText = `✨ 你好，${username}！欢迎回来`;
+                    }
+                }
+                
                 setupFamilyRole(username);
-                
                 fetchMyRecords();
             } else {
-                document.getElementById('loginBox').style.display = 'block';
-                document.getElementById('mainBox').style.display = 'none';
+                if(loginBox) loginBox.style.display = 'block';
+                if(mainBox) mainBox.style.display = 'none';
             }
         }
 
-        // 【核心函数】根据成员身份，分发不同的具体功能
-       // 🎯 职业版核心扩展：根据全家人的职业身份动态分发功能
+        // 🎯 核心扩展：加装了异常防护罩，绝对不会抛出 style of null 错误
         function setupFamilyRole(username) {
             const categorySelect = document.getElementById('category');
+            if(!categorySelect) return;
+            
             categorySelect.innerHTML = ''; // 清空
             
-            // 隐藏所有提示块
-            document.getElementById('momPanel').style.display = 'none';
-            document.getElementById('dadPanel').style.display = 'none';
-            document.getElementById('sisterPanel').style.display = 'none';
-            document.getElementById('brotherPanel').style.display = 'none'; // 这里用来对应姐夫
+            // 安全地隐藏所有提示块（加装存在性校验）
+            const panels = ['momPanel', 'dadPanel', 'sisterPanel', 'brotherPanel'];
+            panels.forEach(id => {
+                const el = document.getElementById(id);
+                if(el) el.style.display = 'none';
+            });
 
             if (username === 'mother') {
-                // 妈妈（商人）
                 addOption(categorySelect, '📈 商业灵感记事', '商业灵感记事');
                 addOption(categorySelect, '💰 商务/家庭记账', '商务家庭记账');
                 addOption(categorySelect, '📅 核心日程备忘', '核心日程备忘');
-                // 显示妈妈专属看板
-                document.getElementById('momPanel').innerHTML = "👩‍💼 妈妈（老板）看板：今日有新的市场灵感吗？记得核对本周资金流水。";
-                document.getElementById('momPanel').style.display = 'block';
+                const p = document.getElementById('momPanel');
+                if(p) p.style.display = 'block';
                 
             } else if (username === 'father') {
-                // 爸爸（商人）
                 addOption(categorySelect, '🤝 重要客户备忘', '重要客户备忘');
                 addOption(categorySelect, '🚘 商务出差打卡', '商务出差打卡');
                 addOption(categorySelect, '📝 经营心得随笔', '经营心得随笔');
-                // 显示爸爸专属看板
-                document.getElementById('dadPanel').innerHTML = "👨‍💼 爸爸（老板）看板：和重要客户的约谈资料记得做好备份，出差注意安全。";
-                document.getElementById('dadPanel').style.display = 'block';
+                const p = document.getElementById('dadPanel');
+                if(p) p.style.display = 'block';
                 
             } else if (username === 'sister') {
-                // 姐姐（大学老师）
                 addOption(categorySelect, '📚 教学备课灵感', '教学备课灵感');
                 addOption(categorySelect, '🧪 科研进度打卡', '科研进度打卡');
                 addOption(categorySelect, '🎓 学生事务备注', '学生事务备注');
-                // 显示姐姐专属看板
-                document.getElementById('sisterPanel').innerHTML = "👩‍🏫 姐姐（周老师）看板：下周的教案准备好了吗？记得关注学生的论文初稿进度。";
-                document.getElementById('sisterPanel').style.display = 'block';
+                const p = document.getElementById('sisterPanel');
+                if(p) p.style.display = 'block';
                 
             } else if (username === 'brother') {
-                // 姐夫（工程师） 
-                // 提示：登录代号我们依然用 brother，但界面上显示为工程师姐夫
                 addOption(categorySelect, '🛠️ 家庭设备维护', '家庭设备维护');
                 addOption(categorySelect, '💻 技术学习/Bug日志', '技术学习Bug日志');
                 addOption(categorySelect, '✅ 高效待办清单', '高效待办清单');
-                // 显示姐夫专属看板
-                document.getElementById('brotherPanel').innerHTML = "👨‍💻 姐夫（工程师）看板：家里的路由器、智能家居固件该检查更新了，今天写代码也要多喝水！";
-                document.getElementById('brotherPanel').style.display = 'block';
+                const p = document.getElementById('brotherPanel');
+                if(p) p.style.display = 'block';
                 
             } else {
                 addOption(categorySelect, '📝 游客日常记录', '游客日常记录');
             }
         }
 
-        // 辅助工具：往下拉菜单加选项
         function addOption(selectElement, text, value) {
             const opt = document.createElement('option');
             opt.text = text;
@@ -162,7 +173,6 @@
             selectElement.add(opt);
         }
 
-        // 拉取数据
         async function fetchMyRecords() {
             const { data, error } = await client
                 .from('family_records')
@@ -170,10 +180,11 @@
                 .order('created_at', { ascending: false });
 
             const listDiv = document.getElementById('myRecordsList');
+            if(!listDiv) return;
             listDiv.innerHTML = '';
 
             if (error || !data || data.length === 0) {
-                listDiv.innerHTML = '<p style="color:#999;">暂无记录</p>';
+                listDiv.innerHTML = '<p style="color:#999; font-size:14px;">这里空空如也，快去记录第一条吧！</p>';
                 return;
             }
 
@@ -181,44 +192,42 @@
                 const div = document.createElement('div');
                 div.className = 'log-item';
                 div.innerHTML = `
-                    <span>[${item.category}] ${item.content}</span>
+                    <span style="font-size:14px; color:#2c3e50;"><b>[${item.category}]</b> ${item.content}</span>
                     <button class="del-btn" onclick="deleteRecord(${item.id})">删除</button>
                 `;
                 listDiv.appendChild(div);
             });
         }
 
-        // 添加数据
         async function addRecord() {
-            const content = document.getElementById('content').value.trim();
-            const category = document.getElementById('category').value;
-            if(!content) return alert('内容不能为空');
+            const contentEl = document.getElementById('content');
+            const categoryEl = document.getElementById('category');
+            if(!contentEl || !categoryEl) return;
 
-            // 发送请求
+            const content = contentEl.value.trim();
+            const category = categoryEl.value;
+            if(!content) return alert('不能提交空空的内容哦！');
+
             const { error } = await client
                 .from('family_records')
                 .insert([{ content, category }]);
 
-            // 💡 核心改变：如果失败，把具体的 error.message 弹出来
             if (error) {
-                alert('保存失败！报错原因：' + error.message); 
-                console.error('详细错误对象:', error);
+                alert('保存失败了！原因：' + error.message);
             } else {
-                document.getElementById('content').value = '';
+                contentEl.value = '';
                 fetchMyRecords();
             }
         }
 
-        // 删除数据
         async function deleteRecord(id) {
-            if(!confirm('确定要删除这条记录吗？')) return;
-            
+            if(!confirm('确定要删除这条足迹吗？')) return;
             const { error } = await client
                 .from('family_records')
                 .delete()
                 .eq('id', id);
 
-            if (error) alert('删除失败');
+            if (error) alert('删除失败：' + error.message);
             else fetchMyRecords();
         }
 
