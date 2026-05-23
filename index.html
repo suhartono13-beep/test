@@ -25,7 +25,7 @@
     <div id="loginBox" class="box">
         <h3>家人登录</h3>
         <input type="text" id="username" placeholder="输入你的名字代号 (如: father, mother)">
-        <input type="password" id="password" placeholder="输入密码">
+        <input type="text" id="username" placeholder="名字代号 (mother, father, sister, brother)">
         <button onclick="login()">进入空间</button>
     </div>
 
@@ -101,39 +101,56 @@
         }
 
         // 【核心函数】根据成员身份，分发不同的具体功能
+       // 🎯 职业版核心扩展：根据全家人的职业身份动态分发功能
         function setupFamilyRole(username) {
             const categorySelect = document.getElementById('category');
+            categorySelect.innerHTML = ''; // 清空
             
-            // 先清空原有的选项
-            categorySelect.innerHTML = '';
-            
-            // 隐藏所有的专属面板
+            // 隐藏所有提示块
             document.getElementById('momPanel').style.display = 'none';
             document.getElementById('dadPanel').style.display = 'none';
+            document.getElementById('sisterPanel').style.display = 'none';
+            document.getElementById('brotherPanel').style.display = 'none'; // 这里用来对应姐夫
 
-            // 根据名字，塞入不同的专属功能选项
             if (username === 'mother') {
-                // 妈妈专属功能
-                addOption(categorySelect, '💰 家庭记账', '家庭记账');
-                addOption(categorySelect, '📝 生活记录', '生活记录');
-                // 显示妈妈专属提示
+                // 妈妈（商人）
+                addOption(categorySelect, '📈 商业灵感记事', '商业灵感记事');
+                addOption(categorySelect, '💰 商务/家庭记账', '商务家庭记账');
+                addOption(categorySelect, '📅 核心日程备忘', '核心日程备忘');
+                // 显示妈妈专属看板
+                document.getElementById('momPanel').innerHTML = "👩‍💼 妈妈（老板）看板：今日有新的市场灵感吗？记得核对本周资金流水。";
                 document.getElementById('momPanel').style.display = 'block';
                 
             } else if (username === 'father') {
-                // 爸爸专属功能
-                addOption(categorySelect, '🧹 家务打卡', '家务打卡');
-                addOption(categorySelect, '🛠️ 房屋修缮', '房屋修缮');
-                addOption(categorySelect, '📝 生活记录', '生活记录');
-                // 显示爸爸专属提示
+                // 爸爸（商人）
+                addOption(categorySelect, '🤝 重要客户备忘', '重要客户备忘');
+                addOption(categorySelect, '🚘 商务出差打卡', '商务出差打卡');
+                addOption(categorySelect, '📝 经营心得随笔', '经营心得随笔');
+                // 显示爸爸专属看板
+                document.getElementById('dadPanel').innerHTML = "👨‍💼 爸爸（老板）看板：和重要客户的约谈资料记得做好备份，出差注意安全。";
                 document.getElementById('dadPanel').style.display = 'block';
                 
-            } else if (username === 'child') {
-                // 孩子专属功能
-                addOption(categorySelect, '📚 学习打卡', '学习打卡');
-                addOption(categorySelect, '🍬 零花钱记账', '零花钱记账');
+            } else if (username === 'sister') {
+                // 姐姐（大学老师）
+                addOption(categorySelect, '📚 教学备课灵感', '教学备课灵感');
+                addOption(categorySelect, '🧪 科研进度打卡', '科研进度打卡');
+                addOption(categorySelect, '🎓 学生事务备注', '学生事务备注');
+                // 显示姐姐专属看板
+                document.getElementById('sisterPanel').innerHTML = "👩‍🏫 姐姐（周老师）看板：下周的教案准备好了吗？记得关注学生的论文初稿进度。";
+                document.getElementById('sisterPanel').style.display = 'block';
+                
+            } else if (username === 'brother') {
+                // 姐夫（工程师） 
+                // 提示：登录代号我们依然用 brother，但界面上显示为工程师姐夫
+                addOption(categorySelect, '🛠️ 家庭设备维护', '家庭设备维护');
+                addOption(categorySelect, '💻 技术学习/Bug日志', '技术学习Bug日志');
+                addOption(categorySelect, '✅ 高效待办清单', '高效待办清单');
+                // 显示姐夫专属看板
+                document.getElementById('brotherPanel').innerHTML = "👨‍💻 姐夫（工程师）看板：家里的路由器、智能家居固件该检查更新了，今天写代码也要多喝水！";
+                document.getElementById('brotherPanel').style.display = 'block';
+                
             } else {
-                // 备用：其他可能添加的普通成员
-                addOption(categorySelect, '📝 普通记录', '普通记录');
+                addOption(categorySelect, '📝 游客日常记录', '游客日常记录');
             }
         }
 
