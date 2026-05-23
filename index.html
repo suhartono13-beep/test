@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>全新升级 🏡 职业版家庭日常空间</title>
+    <title>🏡 职业版家庭日常空间 (安全密码版)</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { font-family: system-ui, sans-serif; padding: 20px; max-width: 500px; margin: 0 auto; background: #f4f6f9; }
@@ -26,9 +26,9 @@
     <h1 style="text-align: center; color: #2c3e50; margin-bottom: 30px;">🏡 我们的家庭日常空间</h1>
 
     <div id="loginBox" class="box">
-        <h3 style="margin-top:0;">家人登录</h3>
-        <input type="text" id="username" placeholder="代号 (mother, father, sister, brother)">
-        <input type="password" id="password" placeholder="输入密码">
+        <h3 style="margin-top:0;">家人密码登录</h3>
+        <input type="text" id="username" placeholder="请输入代号 (mother, father, sister, brother)">
+        <input type="password" id="password" placeholder="请输入你的专属密码">
         <button onclick="login()">进入空间</button>
     </div>
 
@@ -62,26 +62,33 @@
         
         const SUFFIX = '@family.local'; 
 
-        // 登录（带安全防空保护）
+        // 登录（加装极其强悍的防空检查，绝不报错）
         async function login() {
             const userEl = document.getElementById('username');
             const passEl = document.getElementById('password');
             
-            if(!userEl || !passEl) {
-                return alert('前端网页元素损坏，请重新刷新页面或重新复制代码！');
+            // 阻断性校验：如果页面上缺少输入框，立刻拦截并提示，不往下执行引发 null 报错
+            if (!userEl || !passEl) {
+                return alert('前端代码获取输入框失败，请尝试刷新页面！');
             }
 
             const user = userEl.value.trim().toLowerCase();
             const pass = passEl.value;
-            if(!user || !pass) return alert('请输入代号和密码');
+            
+            if (!user || !pass) {
+                return alert('请输入代号和密码！');
+            }
 
             const { data, error } = await client.auth.signInWithPassword({
                 email: user + SUFFIX,
                 password: pass
             });
 
-            if (error) alert('登录失败，密码或代号不对哦');
-            else checkUser();
+            if (error) {
+                alert('登录失败，密码或代号不对哦');
+            } else {
+                checkUser();
+            }
         }
 
         async function logout() {
@@ -95,17 +102,21 @@
             const mainBox = document.getElementById('mainBox');
 
             if (session) {
-                if(loginBox) loginBox.style.display = 'none';
-                if(mainBox) mainBox.style.display = 'block';
+                if (loginBox) loginBox.style.display = 'none';
+                if (mainBox) mainBox.style.display = 'block';
                 
                 const username = session.user.email.split('@')[0];
                 const welcomeMsg = document.getElementById('welcomeMsg');
                 
-                if(welcomeMsg) {
-                    if(username === 'brother') {
-                        welcomeMsg.innerText = `✨ 你好，工程师姐夫！欢迎回来`;
-                    } else if(username === 'sister') {
-                        welcomeMsg.innerText = `✨ 你好，周老师（姐姐）！欢迎回来`;
+                if (welcomeMsg) {
+                    if (username === 'brother') {
+                        welcomeMsg.innerText = `✨ 你好，姐夫！欢迎回来`;
+                    } else if (username === 'sister') {
+                        welcomeMsg.innerText = `✨ 你好，姐姐！欢迎回来`;
+                    } else if (username === 'mother') {
+                        welcomeMsg.innerText = `✨ 你好，妈妈！欢迎回来`;
+                    } else if (username === 'father') {
+                        welcomeMsg.innerText = `✨ 你好，爸爸！欢迎回来`;
                     } else {
                         welcomeMsg.innerText = `✨ 你好，${username}！欢迎回来`;
                     }
@@ -114,52 +125,56 @@
                 setupFamilyRole(username);
                 fetchMyRecords();
             } else {
-                if(loginBox) loginBox.style.display = 'block';
-                if(mainBox) mainBox.style.display = 'none';
+                if (loginBox) loginBox.style.display = 'block';
+                if (mainBox) mainBox.style.display = 'none';
             }
         }
 
-        // 🎯 核心扩展：加装了异常防护罩，绝对不会抛出 style of null 错误
+        // 核心：分发四人职业特制功能（加装异常防护罩，杜绝 style of null）
         function setupFamilyRole(username) {
             const categorySelect = document.getElementById('category');
-            if(!categorySelect) return;
+            if (!categorySelect) return;
             
-            categorySelect.innerHTML = ''; // 清空
+            categorySelect.innerHTML = ''; // 清空选项
             
-            // 安全地隐藏所有提示块（加装存在性校验）
+            // 安全隐蔽所有看板
             const panels = ['momPanel', 'dadPanel', 'sisterPanel', 'brotherPanel'];
             panels.forEach(id => {
                 const el = document.getElementById(id);
-                if(el) el.style.display = 'none';
+                if (el) el.style.display = 'none';
             });
 
             if (username === 'mother') {
+                // 妈妈（商人）
                 addOption(categorySelect, '📈 商业灵感记事', '商业灵感记事');
                 addOption(categorySelect, '💰 商务/家庭记账', '商务家庭记账');
                 addOption(categorySelect, '📅 核心日程备忘', '核心日程备忘');
                 const p = document.getElementById('momPanel');
-                if(p) p.style.display = 'block';
+                if (p) p.style.display = 'block';
                 
             } else if (username === 'father') {
+                // 爸爸（商人）
                 addOption(categorySelect, '🤝 重要客户备忘', '重要客户备忘');
                 addOption(categorySelect, '🚘 商务出差打卡', '商务出差打卡');
                 addOption(categorySelect, '📝 经营心得随笔', '经营心得随笔');
                 const p = document.getElementById('dadPanel');
-                if(p) p.style.display = 'block';
+                if (p) p.style.display = 'block';
                 
             } else if (username === 'sister') {
+                // 姐姐（大学老师）
                 addOption(categorySelect, '📚 教学备课灵感', '教学备课灵感');
                 addOption(categorySelect, '🧪 科研进度打卡', '科研进度打卡');
                 addOption(categorySelect, '🎓 学生事务备注', '学生事务备注');
                 const p = document.getElementById('sisterPanel');
-                if(p) p.style.display = 'block';
+                if (p) p.style.display = 'block';
                 
             } else if (username === 'brother') {
+                // 姐夫（工程师），使用原 brother 账号登录
                 addOption(categorySelect, '🛠️ 家庭设备维护', '家庭设备维护');
                 addOption(categorySelect, '💻 技术学习/Bug日志', '技术学习Bug日志');
                 addOption(categorySelect, '✅ 高效待办清单', '高效待办清单');
                 const p = document.getElementById('brotherPanel');
-                if(p) p.style.display = 'block';
+                if (p) p.style.display = 'block';
                 
             } else {
                 addOption(categorySelect, '📝 游客日常记录', '游客日常记录');
@@ -180,7 +195,7 @@
                 .order('created_at', { ascending: false });
 
             const listDiv = document.getElementById('myRecordsList');
-            if(!listDiv) return;
+            if (!listDiv) return;
             listDiv.innerHTML = '';
 
             if (error || !data || data.length === 0) {
@@ -202,11 +217,11 @@
         async function addRecord() {
             const contentEl = document.getElementById('content');
             const categoryEl = document.getElementById('category');
-            if(!contentEl || !categoryEl) return;
+            if (!contentEl || !categoryEl) return;
 
             const content = contentEl.value.trim();
             const category = categoryEl.value;
-            if(!content) return alert('不能提交空空的内容哦！');
+            if (!content) return alert('不能提交空空的内容哦！');
 
             const { error } = await client
                 .from('family_records')
@@ -221,7 +236,7 @@
         }
 
         async function deleteRecord(id) {
-            if(!confirm('确定要删除这条足迹吗？')) return;
+            if (!confirm('确定要删除这条足迹吗？')) return;
             const { error } = await client
                 .from('family_records')
                 .delete()
