@@ -2,66 +2,156 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>访客操作记录面板</title>
+    <title>我们的家庭日常站</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: system-ui, sans-serif; padding: 20px; max-width: 500px; margin: 0 auto; background: #f9f9f9; }
+        .box { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        input, select { display: block; width: 100%; padding: 10px; margin-bottom: 10px; box-sizing: border-box; border: 1px solid #ddd; border-radius: 6px; }
+        button { width: 100%; padding: 10px; background: #4CAF50; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; }
+        button.logout { background: #9e9e9e; margin-top: 10px; }
+        .log-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
+        .del-btn { background: #ff4d4d; color: white; border: none; padding: 2px 8px; border-radius: 4px; cursor: pointer; width: auto; font-size: 12px; }
+    </style>
 </head>
 <body>
-    <h1>欢迎来到访客记录站</h1>
-    
-    <input type="text" id="visitorName" placeholder="输入你的名字">
-    <button onclick="recordAction('点击了测试按钮')">记录测试操作</button>
 
-    <h2>最近的操作记录：</h2>
-    <ul id="logList"></ul>
+    <h1 style="text-align: center; color: #333;">🏡 家庭日常空间</h1>
+
+    <div id="loginBox" class="box">
+        <h3>家人登录</h3>
+        <input type="text" id="username" placeholder="输入你的名字代号 (如: father, mother)">
+        <input type="password" id="password" placeholder="输入密码">
+        <button onclick="login()">进入空间</button>
+    </div>
+
+    <div id="mainBox" class="box" style="display: none;">
+        <h3 id="welcomeMsg">欢迎</h3>
+        
+        <hr>
+        <h4>新增一条记录</h4>
+        <select id="category">
+            <option value="生活记录">📝 生活记录</option>
+            <option value="家庭记账">💰 家庭记账</option>
+            <option value="家务打卡">🧹 家务打卡</option>
+        </select>
+        <input type="text" id="content" placeholder="今天写点什么？">
+        <button onclick="addRecord()">提交记录</button>
+
+        <hr>
+        <h4>我的历史记录</h4>
+        <div id="myRecordsList">加载中...</div>
+
+        <button onclick="logout()" class="logout">退出登录</button>
+    </div>
 
     <script>
-        // 替换为你自己的 Supabase URL 和 Anon Key
         const SUPABASE_URL = 'https://cabqmwtayaojrvdehqrt.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_AlLGYT7ONGa0q_eIqHpXlg_H7giwU9N';
         
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // 修复点：将创建的实例命名为 client，避免与全局的 supabase 对象冲突
+        const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // 记录操作到数据库
-        async function recordAction(actionType) {
-            const name = document.getElementById('visitorName').value || '匿名访客';
-            
-            const { data, error } = await supabase
-                .from('visitor_logs')
-                .insert([{ visitor_name: name, action: actionType }]);
+        const SUFFIX = '@family.local'; // 家庭专属虚拟邮箱后缀
 
-            if (error) {
-                console.error('记录失败:', error);
-                alert('记录失败');
+        // 登录
+        async function login() {
+            const user = document.getElementById('username').value.trim();
+            const pass = document.getElementById('password').value;
+            if(!user || !pass) return alert('请输入代号和密码');
+
+            // 修复点：替换为 client.auth
+            const { data, error } = await client.auth.signInWithPassword({
+                email: user + SUFFIX,
+                password: pass
+            });
+
+            if (error) alert('登录失败，密码错啦');
+            else checkUser();
+        }
+
+        // 登出
+        async function logout() {
+            // 修复点：替换为 client.auth
+            await client.auth.signOut();
+            checkUser();
+        }
+
+        // 检查状态
+        async function checkUser() {
+            // 修复点：替换为 client.auth
+            const { data: { session } } = await client.auth.getSession();
+            if (session) {
+                document.getElementById('loginBox').style.display = 'none';
+                document.getElementById('mainBox').style.display = 'block';
+                document.getElementById('welcomeMsg').innerText = `你好，${session.user.email.split('@')[0]} 欢迎回家！`;
+                fetchMyRecords();
             } else {
-                alert('操作已记录！');
-                fetchLogs(); // 刷新列表
+                document.getElementById('loginBox').style.display = 'block';
+                document.getElementById('mainBox').style.display = 'none';
             }
         }
 
-        // 从数据库读取最新记录
-        async function fetchLogs() {
-            const { data, error } = await supabase
-                .from('visitor_logs')
+        // 核心：拉取数据
+        async function fetchMyRecords() {
+            // 修复点：替换为 client.from
+            const { data, error } = await client
+                .from('family_records')
                 .select('*')
-                .order('created_at', { ascending: false })
-                .limit(10);
+                .order('created_at', { ascending: false });
 
-            if (error) {
-                console.error('获取数据失败:', error);
+            const listDiv = document.getElementById('myRecordsList');
+            listDiv.innerHTML = '';
+
+            if (error || !data || data.length === 0) {
+                listDiv.innerHTML = '<p style="color:#999;">暂无记录</p>';
                 return;
             }
 
-            const list = document.getElementById('logList');
-            list.innerHTML = '';
-            data.forEach(log => {
-                const li = document.createElement('li');
-                li.textContent = `${log.created_at} - ${log.visitor_name}: ${log.action}`;
-                list.appendChild(li);
+            data.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'log-item';
+                div.innerHTML = `
+                    <span>[${item.category}] ${item.content}</span>
+                    <button class="del-btn" onclick="deleteRecord(${item.id})">删除</button>
+                `;
+                listDiv.appendChild(div);
             });
         }
 
-        // 页面加载时获取一次记录
-        window.onload = fetchLogs;
+        // 核心：添加数据
+        async function addRecord() {
+            const content = document.getElementById('content').value.trim();
+            const category = document.getElementById('category').value;
+            if(!content) return alert('内容不能为空');
+
+            // 修复点：替换为 client.from
+            const { error } = await client
+                .from('family_records')
+                .insert([{ content, category }]);
+
+            if (error) alert('保存失败');
+            else {
+                document.getElementById('content').value = '';
+                fetchMyRecords();
+            }
+        }
+
+        // 核心：删除数据
+        async function deleteRecord(id) {
+            if(!confirm('确定要删除这条记录吗？')) return;
+            
+            // 修复点：替换为 client.from
+            const { error } = await client
+                .from('family_records')
+                .delete()
+                .eq('id', id);
+
+            if (error) alert('删除失败');
+            else fetchMyRecords();
+        }
+
+        window.onload = checkUser;
     </script>
 </body>
 </html>
