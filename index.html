@@ -177,12 +177,16 @@
             const category = document.getElementById('category').value;
             if(!content) return alert('内容不能为空');
 
+            // 发送请求
             const { error } = await client
                 .from('family_records')
                 .insert([{ content, category }]);
 
-            if (error) alert('保存失败');
-            else {
+            // 💡 核心改变：如果失败，把具体的 error.message 弹出来
+            if (error) {
+                alert('保存失败！报错原因：' + error.message); 
+                console.error('详细错误对象:', error);
+            } else {
                 document.getElementById('content').value = '';
                 fetchMyRecords();
             }
