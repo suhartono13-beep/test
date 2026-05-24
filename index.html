@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🏡 职业版家庭日常空间</title>
+    <title>🏡 家庭日常空间</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { 
             font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
             padding: 16px; 
-            max-width: 650px; /* 稍微加宽一点，方便电脑端看表格 */
+            max-width: 650px; 
             margin: 0 auto; 
             background: #f4f6f9; 
             color: #333;
@@ -93,17 +93,17 @@
         .btn-recipe { background-color: #ff7875; box-shadow: 0 2px 4px rgba(255, 120, 117, 0.3); }
         .btn-health { background-color: #52c41a; box-shadow: 0 2px 4px rgba(82, 196, 26, 0.3); }
 
-        /* 💡 新增：表格及其容器专属样式 */
         .table-responsive {
             width: 100%;
-            overflow-x: auto; /* 防止表格在手机上过宽撑破页面 */
+            overflow-x: auto; 
             -webkit-overflow-scrolling: touch;
+            margin-bottom: 20px; /* 增加多个表格之间的间距 */
         }
         .record-table {
             width: 100%;
             border-collapse: collapse;
             font-size: 14px;
-            min-width: 450px; /* 保证表格列不会被无限压缩 */
+            min-width: 350px; /* 因为去掉了一列，最小宽度可以缩小，更适应手机 */
         }
         .record-table th, .record-table td {
             padding: 12px 8px;
@@ -120,7 +120,6 @@
         .record-table td.content-col {
             color: #303133;
             word-break: break-all;
-            min-width: 150px; /* 内容列稍微宽一点 */
         }
         .record-table td.action-col {
             text-align: right;
@@ -163,7 +162,7 @@
         <button onclick="addRecord()">提交保存</button>
 
         <div id="momPanel" class="exclusive-panel">
-            <b>👩‍💼 妈妈（商人）健康看板：</b><br>
+            <b>👩‍💼 妈妈健康看板：</b><br>
             💡 提示：今日有新的市场灵感吗？忙碌之余记得一键登记血压血糖。<br>
             <div style="margin-top: 8px; border-top: 1px dashed #ffadd2; padding-top: 8px;">
                 <b>🍳 养生菜谱与营养直达站：</b><br>
@@ -171,9 +170,9 @@
                 <a href="https://www.boohee.com/food/" target="_blank" class="external-link-btn btn-health">🥗 查食物热量/升糖</a>
             </div>
         </div>
-        <div id="dadPanel" class="exclusive-panel">👨‍💼 爸爸（商人）看板：和重要客户的约谈资料记得做好备份，出差注意安全。</div>
-        <div id="sisterPanel" class="exclusive-panel">👩‍🏫 姐姐（马老师）看板：下周的教案准备好了吗？记得关注学生的论文初稿进度。</div>
-        <div id="brotherPanel" class="exclusive-panel">👷‍♂️ 姐夫（建筑师）看板：最近的建筑图纸画完了吗？去工地视察一定要记得戴好安全帽，注意安全！</div>
+        <div id="dadPanel" class="exclusive-panel">👨‍💼 爸爸看板：和重要客户的约谈资料记得做好备份，出差注意安全。</div>
+        <div id="sisterPanel" class="exclusive-panel">👩‍🏫 姐姐看板：下周的教案准备好了吗？记得关注学生的论文初稿进度。</div>
+        <div id="brotherPanel" class="exclusive-panel">👷‍♂️ 姐夫看板：最近的建筑图纸画完了吗？去工地视察一定要记得戴好安全帽，注意安全！</div>
 
         <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
         <h4>📋 我的历史足迹</h4>
@@ -228,8 +227,8 @@
                 if (welcomeMsg) {
                     if (username === 'brother') welcomeMsg.innerText = `✨ 你好，建筑师姐夫！`;
                     else if (username === 'sister') welcomeMsg.innerText = `✨ 你好，马老师（姐姐）！`;
-                    else if (username === 'mother') welcomeMsg.innerText = `✨ 你好，妈妈（老板）！`;
-                    else if (username === 'father') welcomeMsg.innerText = `✨ 你好，爸爸（老板）！`;
+                    else if (username === 'mother') welcomeMsg.innerText = `✨ 你好，妈妈！`;
+                    else if (username === 'father') welcomeMsg.innerText = `✨ 你好，爸爸！`;
                     else welcomeMsg.innerText = `✨ 你好，${username}！`;
                 }
                 
@@ -257,7 +256,7 @@
                 addOption(categorySelect, '🍳 每日养生打卡', '每日养生打卡');
                 addOption(categorySelect, '📈 商业灵感记事', '商业灵感记事');
                 addOption(categorySelect, '💰 商务/家庭记账', '商务家庭记账');
-                addOption(categorySelect, '📅 核心日程备忘', '核心日程备备忘');
+                addOption(categorySelect, '📅 核心日程备忘', '核心日程备忘');
                 const p = document.getElementById('momPanel');
                 if (p) p.style.display = 'block';
                 handleCategoryChange();
@@ -305,7 +304,7 @@
             selectElement.add(opt);
         }
 
-        // 💡 核心改版：用表格渲染数据
+        // 💡 核心改版：对数据进行分组，并渲染多张表格
         async function fetchMyRecords() {
             const { data, error } = await client
                 .from('family_records')
@@ -321,50 +320,67 @@
                 return;
             }
 
-            // 构建表格头部
-            let tableHTML = `
-                <div class="table-responsive">
-                    <table class="record-table">
-                        <thead>
-                            <tr>
-                                <th>时间</th>
-                                <th>分类</th>
-                                <th>记录内容</th>
-                                <th style="text-align: right;">操作</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `;
-
-            // 循环填入表格内容
+            // 1. 先把一整包数据按照 category 分拣到不同的数组里
+            const groupedData = {};
             data.forEach(item => {
-                // 格式化时间，比如 "05-24 14:30"
-                const d = new Date(item.created_at);
-                const timeStr = `${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-                
-                let tagColor = "#2c3e50";
-                if(item.category === '血压血糖登记') tagColor = "#e91e63";
-                if(item.category === '每日养生打卡') tagColor = "#ff9800";
-
-                tableHTML += `
-                    <tr>
-                        <td style="color:#909399; font-size:12px; white-space:nowrap;">${timeStr}</td>
-                        <td style="color:${tagColor}; font-weight:bold; white-space:nowrap;">${item.category}</td>
-                        <td class="content-col">${item.content}</td>
-                        <td class="action-col">
-                            <button class="del-btn" onclick="deleteRecord(${item.id})">删除</button>
-                        </td>
-                    </tr>
-                `;
+                if (!groupedData[item.category]) {
+                    groupedData[item.category] = [];
+                }
+                groupedData[item.category].push(item);
             });
 
-            tableHTML += `
-                        </tbody>
-                    </table>
-                </div>
-            `;
+            // 2. 遍历分组后的字典，分别生成标题和表格
+            let finalHTML = '';
             
-            listDiv.innerHTML = tableHTML;
+            for (const category in groupedData) {
+                // 根据分类设定不同的标题颜色，让健康类更醒目
+                let headerColor = "#4CAF50"; // 默认绿色
+                if(category === '血压血糖登记') headerColor = "#e91e63"; // 粉红色
+                if(category === '每日养生打卡') headerColor = "#ff9800"; // 橙色
+                
+                finalHTML += `
+                    <h5 style="color: ${headerColor}; margin: 24px 0 10px 0; font-size: 15px; border-left: 4px solid ${headerColor}; padding-left: 8px;">
+                        ${category} 
+                        <span style="color:#999; font-size:12px; font-weight:normal; margin-left:8px;">(共 ${groupedData[category].length} 条)</span>
+                    </h5>
+                    
+                    <div class="table-responsive">
+                        <table class="record-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 100px;">时间</th>
+                                    <th>记录内容</th>
+                                    <th style="text-align: right; width: 60px;">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+
+                // 填入当前分类下的所有记录
+                groupedData[category].forEach(item => {
+                    const d = new Date(item.created_at);
+                    const timeStr = `${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+                    
+                    finalHTML += `
+                        <tr>
+                            <td style="color:#909399; font-size:12px; white-space:nowrap;">${timeStr}</td>
+                            <td class="content-col">${item.content}</td>
+                            <td class="action-col">
+                                <button class="del-btn" onclick="deleteRecord(${item.id})">删除</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                finalHTML += `
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }
+
+            // 一次性渲染到页面中
+            listDiv.innerHTML = finalHTML;
         }
 
         async function addRecord() {
