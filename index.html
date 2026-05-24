@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🏡 家庭日常空间</title>
+    <title>🏡 职业版家庭日常空间</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { 
@@ -97,13 +97,13 @@
             width: 100%;
             overflow-x: auto; 
             -webkit-overflow-scrolling: touch;
-            margin-bottom: 20px; /* 增加多个表格之间的间距 */
+            margin-bottom: 20px;
         }
         .record-table {
             width: 100%;
             border-collapse: collapse;
             font-size: 14px;
-            min-width: 350px; /* 因为去掉了一列，最小宽度可以缩小，更适应手机 */
+            min-width: 350px;
         }
         .record-table th, .record-table td {
             padding: 12px 8px;
@@ -162,7 +162,7 @@
         <button onclick="addRecord()">提交保存</button>
 
         <div id="momPanel" class="exclusive-panel">
-            <b>👩‍💼 妈妈健康看板：</b><br>
+            <b>👩‍💼 妈妈（商人）健康看板：</b><br>
             💡 提示：今日有新的市场灵感吗？忙碌之余记得一键登记血压血糖。<br>
             <div style="margin-top: 8px; border-top: 1px dashed #ffadd2; padding-top: 8px;">
                 <b>🍳 养生菜谱与营养直达站：</b><br>
@@ -170,9 +170,9 @@
                 <a href="https://www.boohee.com/food/" target="_blank" class="external-link-btn btn-health">🥗 查食物热量/升糖</a>
             </div>
         </div>
-        <div id="dadPanel" class="exclusive-panel">👨‍💼 爸爸看板：和重要客户的约谈资料记得做好备份，出差注意安全。</div>
-        <div id="sisterPanel" class="exclusive-panel">👩‍🏫 姐姐看板：下周的教案准备好了吗？记得关注学生的论文初稿进度。</div>
-        <div id="brotherPanel" class="exclusive-panel">👷‍♂️ 姐夫看板：最近的建筑图纸画完了吗？去工地视察一定要记得戴好安全帽，注意安全！</div>
+        <div id="dadPanel" class="exclusive-panel">👨‍💼 爸爸（商人）看板：和重要客户的约谈资料记得做好备份，出差注意安全。</div>
+        <div id="sisterPanel" class="exclusive-panel">👩‍🏫 姐姐（马老师）看板：下周的教案准备好了吗？记得关注学生的论文初稿进度。</div>
+        <div id="brotherPanel" class="exclusive-panel">👷‍♂️ 姐夫（建筑师）看板：最近的建筑图纸画完了吗？去工地视察一定要记得戴好安全帽，注意安全！</div>
 
         <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
         <h4>📋 我的历史足迹</h4>
@@ -185,7 +185,14 @@
     <script>
         const SUPABASE_URL = 'https://cabqmwtayaojrvdehqrt.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNhYnFtd3RheWFvanJ2ZGVocXJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1MjkzOTMsImV4cCI6MjA5NTEwNTM5M30.t7AXfodxLT84j1UV1ghcQeSKTbi7pt24Ha1iTLTmaog';
-        const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        // 💡 核心修复：强制 Supabase 使用 sessionStorage
+        // 只要关闭这个标签页或浏览器，账号就会自动退出，保护家庭隐私安全
+        const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+            auth: {
+                storage: window.sessionStorage
+            }
+        });
         
         const SUFFIX = '@family.local'; 
 
@@ -227,8 +234,8 @@
                 if (welcomeMsg) {
                     if (username === 'brother') welcomeMsg.innerText = `✨ 你好，建筑师姐夫！`;
                     else if (username === 'sister') welcomeMsg.innerText = `✨ 你好，马老师（姐姐）！`;
-                    else if (username === 'mother') welcomeMsg.innerText = `✨ 你好，妈妈！`;
-                    else if (username === 'father') welcomeMsg.innerText = `✨ 你好，爸爸！`;
+                    else if (username === 'mother') welcomeMsg.innerText = `✨ 你好，妈妈（老板）！`;
+                    else if (username === 'father') welcomeMsg.innerText = `✨ 你好，爸爸（老板）！`;
                     else welcomeMsg.innerText = `✨ 你好，${username}！`;
                 }
                 
@@ -304,7 +311,6 @@
             selectElement.add(opt);
         }
 
-        // 💡 核心改版：对数据进行分组，并渲染多张表格
         async function fetchMyRecords() {
             const { data, error } = await client
                 .from('family_records')
@@ -320,7 +326,6 @@
                 return;
             }
 
-            // 1. 先把一整包数据按照 category 分拣到不同的数组里
             const groupedData = {};
             data.forEach(item => {
                 if (!groupedData[item.category]) {
@@ -329,14 +334,12 @@
                 groupedData[item.category].push(item);
             });
 
-            // 2. 遍历分组后的字典，分别生成标题和表格
             let finalHTML = '';
             
             for (const category in groupedData) {
-                // 根据分类设定不同的标题颜色，让健康类更醒目
-                let headerColor = "#4CAF50"; // 默认绿色
-                if(category === '血压血糖登记') headerColor = "#e91e63"; // 粉红色
-                if(category === '每日养生打卡') headerColor = "#ff9800"; // 橙色
+                let headerColor = "#4CAF50"; 
+                if(category === '血压血糖登记') headerColor = "#e91e63"; 
+                if(category === '每日养生打卡') headerColor = "#ff9800"; 
                 
                 finalHTML += `
                     <h5 style="color: ${headerColor}; margin: 24px 0 10px 0; font-size: 15px; border-left: 4px solid ${headerColor}; padding-left: 8px;">
@@ -356,7 +359,6 @@
                             <tbody>
                 `;
 
-                // 填入当前分类下的所有记录
                 groupedData[category].forEach(item => {
                     const d = new Date(item.created_at);
                     const timeStr = `${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
@@ -379,7 +381,6 @@
                 `;
             }
 
-            // 一次性渲染到页面中
             listDiv.innerHTML = finalHTML;
         }
 
